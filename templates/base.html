@@ -53,11 +53,13 @@
   </div>
 </nav>
 <div class="container">
+<img src="{{ user.header_image_url }}" alt="{{ user.username}} background" class="img-fluid">
   {% for category, message in get_flashed_messages(with_categories=True) %}
   <div class="alert alert-{{ category }}">{{ message }}</div>
   {% endfor %}
-
+  
   {% block content %}
+  
   {% endblock %}
 
 </div>
