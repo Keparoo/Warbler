@@ -272,11 +272,9 @@ def add_like(message_id):
 def show_likes(user_id):
     """Show the messages a user has liked"""
 
-    likes = Likes.query.filter(Likes.user_id==user_id).all()
-    print(likes)
-
-    return render_template('/users/likes.html', likes=likes)
-    # return redirect('/')
+    user = User.query.get_or_404(user_id)
+    
+    return render_template('/users/likes.html', user=user)
 
 
 ##############################################################################

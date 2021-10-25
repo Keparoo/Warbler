@@ -48,6 +48,9 @@ class Likes(db.Model):
         unique=True
     )
 
+    def __repr__(self):
+        return f"Like {self.id} {self.user_id} {self.message_id}"
+
 
 class User(db.Model):
     """User in the system."""
