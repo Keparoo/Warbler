@@ -17,6 +17,15 @@
             <span class="text-muted">{{ like.timestamp.strftime('%d %B %Y') }}</span>
             <p>{{ like.text }}</p>
         </div>
+            <form method="POST" action="/users/remove_like/{{ like.id }}" id="messages-form">
+              <button class="
+                btn 
+                btn-sm 
+                btn-primary"
+              >
+              <i class="fa fa-star"></i>
+              </button>
+            </form>
         </li>
 
       {% endfor %}
