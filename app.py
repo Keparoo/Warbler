@@ -272,12 +272,10 @@ def add_like(message_id):
 def remove_like(message_id):
     "Unlike a warble"
 
-    user = User.query.get(301)
-    if message_id in [m.id for m in user.messages]:
+    if message_id in [m.id for m in g.user.messages]:
         flash("You can't unlike your own message", "warning")
     else:
         like = Likes.query.filter_by(message_id=message_id).first()
-        print('**************', like)
         db.session.delete(like)
         db.session.commit()
         flash("Message unliked", "success")
