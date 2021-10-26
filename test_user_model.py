@@ -31,23 +31,6 @@ db.create_all()
 
 DEFAULT_IMAGE_URL ="/static/images/default-pic.png"
 DEFAULT_HEADER_IMAGE_URL ="/static/images/warbler-hero.jpg"
-PASWORD1_HASHED = "$2b$12$YE0exSz7LXOXVFvswfhqzebpxKWqcwEi3.44FqFfeul3TyE3b6l4."
-
-U1 = User(
-        email="test1@test.com",
-        username="testuser1",
-        password="HASHED_PASSWORD1",
-        bio="testbio1",
-        location="testlocation1"
-        )
-
-U2 = User(
-        email="test2@test.com",
-        username="testuser2",
-        password="HASHED_PASSWORD2",
-        bio="testbio2",
-        location="testlocation2"
-        )
 
 class UserModelTestCase(TestCase):
     """Test views for messages."""
@@ -105,7 +88,10 @@ class UserModelTestCase(TestCase):
         self.assertEqual(self.u1.image_url, DEFAULT_IMAGE_URL)
         self.assertEqual(self.u1.header_image_url, DEFAULT_HEADER_IMAGE_URL)
 
-        
+    #=========================================================================================================
+    # Follows/Following Tests    
+    #=========================================================================================================
+
     def test_follows(self):
         """Test for follows & following"""
 
@@ -140,7 +126,11 @@ class UserModelTestCase(TestCase):
         db.session.commit()    
 
         self.assertEqual(self.u2.is_followed_by(self.u1), True)   
-        self.assertFalse(self.u1.is_followed_by(self.u2), True)   
+        self.assertFalse(self.u1.is_followed_by(self.u2), True)
+    
+    #=========================================================================================================
+    # Create User Tests    
+    #=========================================================================================================
 
     def test_sign_up(self):
         """Test successful signup"""
@@ -191,3 +181,24 @@ class UserModelTestCase(TestCase):
 
         with self.assertRaises(ValueError) as context:
             User.signup("testuser", "signup@signup.com", "", None)
+
+    #=========================================================================================================
+    # Authentication Tests    
+    #=========================================================================================================
+
+    def test_valid_authenticate(self):
+        """Test valid authentication of user"""
+
+        user = User.authenticate(self.u1.username, "password1")
+        self.assertIsNotNone(user)
+        self.assertEqual(user.id, self.uid1)
+
+    def test_invalid_username(self):
+        """Test invalid username"""
+
+        self.assertFalse(User.authenticate("wrongusername", "password1"))
+
+    def test_invalid_password(self):
+        """Test invalid password"""
+
+        self.assertFalse(User.authenticate(self.u1.username, "wrongpassword"))
