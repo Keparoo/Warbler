@@ -42,13 +42,13 @@ class UserModelTestCase(TestCase):
 
         db.session.commit()
 
-        u1 = User.query.get(uid1)
-        u2 = User.query.get(uid2)
+        self.u1 = User.query.get(uid1)
+        self.u2 = User.query.get(uid2)
 
-        self.u1 = u1
+        # self.u1 = u1
         self.uid1 = uid1
 
-        self.u2 = u2
+        # self.u2 = u2
         self.uid2 = uid2
 
         self.client = app.test_client()
