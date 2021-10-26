@@ -203,7 +203,7 @@ class Message(db.Model):
     user = db.relationship('User')
 
     def __repr__(self):
-        return f"<Message #{self.m.id}: {self.m.timestamp}, {self.m.u_id}>"
+        return f"<Message #{self.m.id}: {self.m.timestamp}, {self.m.user_id}>"
 
 
 def connect_db(app):
