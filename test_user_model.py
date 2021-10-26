@@ -20,7 +20,7 @@ DEFAULT_IMAGE_URL ="/static/images/default-pic.png"
 DEFAULT_HEADER_IMAGE_URL ="/static/images/warbler-hero.jpg"
 
 class UserModelTestCase(TestCase):
-    """Test views for messages."""
+    """Test user model"""
 
     def setUp(self):
         """Create test client, add sample data."""
