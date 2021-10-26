@@ -66,9 +66,43 @@ class MessageViewTestCase(TestCase):
             self.assertEqual(msg.text, "Hello")
 
     def test_add_no_session(self):
-        """Test fail to add when no session var"""
+        """Test fail to add message when no session var"""
 
         with self.client as c:
             resp = c.post("/messages/new", data={"text": "Hello"}, follow_redirects=True)
             self.assertEqual(resp.status_code, 200)
             self.assertIn("Access unauthorized", str(resp.data))
+
+    def test_add_invalid_user(self):
+        """Test fail to add message when wrong user is logged in"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = 999999 # Non-existant user id
+
+            resp = c.post("/messages/new", data={"text": "Hello"}, follow_redirects=True)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized", str(resp.data))
+        
+    def test_message_show(self):
+        """Test show message details"""
+
+        m = Message(
+            id=9999,
+            text="This is a message",
+            user_id=self.uid
+        )
+        
+        db.session.add(m)
+        db.session.commit()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+            
+            message = Message.query.get(9999)
+            resp = c.get(f'/messages/{message.id}')
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn(message.text, str(resp.data))
+            print(str(resp.data))
