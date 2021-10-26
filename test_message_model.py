@@ -2,8 +2,8 @@
 
 # run these tests like:
 #
-#    python -m unittest test_message_model.py
-#    python -m unittest -v test_message_model.py   # For results of both success and fail tests
+#    python -m unittest test_message_views.py
+#    python -m unittest -v test_message_views.py   # For results of both success and fail tests
 
 
 import os
