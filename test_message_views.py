@@ -3,6 +3,7 @@
 # run these tests like:
 #
 #    FLASK_ENV=production python -m unittest test_message_views.py
+#    FLASK_ENV=production python -m unittest -v test_message_views.py # For more verbose output
 
 
 import os
@@ -10,23 +11,9 @@ from unittest import TestCase
 
 from models import db, connect_db, Message, User
 
-# BEFORE we import our app, let's set an environmental variable
-# to use a different database for tests (we need to do this
-# before we import our app, since that will have already
-# connected to the database
-
 os.environ['DATABASE_URL'] = "postgresql:///warbler-test"
 
-
-# Now we can import app
-
 from app import app, CURR_USER_KEY
-
-# Create our tables (we do this here, so we only create the tables
-# once for all tests --- in each test, we'll delete the data
-# and create fresh new clean test data
-
-db.create_all()
 
 # Don't have WTForms use CSRF at all, since it's a pain to test
 
@@ -39,6 +26,9 @@ class MessageViewTestCase(TestCase):
     def setUp(self):
         """Create test client, add sample data."""
 
+        db.drop_all()
+        db.create_all()
+
         User.query.delete()
         Message.query.delete()
 
@@ -48,6 +38,9 @@ class MessageViewTestCase(TestCase):
                                     email="test@test.com",
                                     password="testuser",
                                     image_url=None)
+
+        self.uid = 999
+        self.testuser.id = self.uid
 
         db.session.commit()
 
@@ -62,7 +55,7 @@ class MessageViewTestCase(TestCase):
                 sess[CURR_USER_KEY] = self.testuser.id
 
             # Now, that session setting is saved, so we can have
-            # the rest of ours test
+            # the rest of our tests
 
             resp = c.post("/messages/new", data={"text": "Hello"})
 
@@ -71,3 +64,11 @@ class MessageViewTestCase(TestCase):
 
             msg = Message.query.one()
             self.assertEqual(msg.text, "Hello")
+
+    def test_add_no_session(self):
+        """Test fail to add when no session var"""
+
+        with self.client as c:
+            resp = c.post("/messages/new", data={"text": "Hello"}, follow_redirects=True)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized", str(resp.data))
