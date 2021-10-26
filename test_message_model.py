@@ -11,7 +11,7 @@ from unittest import TestCase
 from sqlalchemy import exc
 from datetime import datetime
 
-from models import db, User, Message, Follows
+from models import db, User, Message, Follows, Likes
 
 os.environ['DATABASE_URL'] = "postgresql:///warbler-test"
 
@@ -70,3 +70,30 @@ class MessageModelTestCase(TestCase):
         # test message.user relationship
         self.assertEqual(m.user, self.u)
 
+    def test_message_likes(self):
+        """Test liking a message"""
+
+        m_to_like = Message(
+            text="test message 1",
+            user_id=self.uid
+        )
+
+        unliked_message = Message(
+            text="message not liked",
+            user_id=self.uid
+        )
+
+        user = User.signup('likestestuser', 'likes@likes.com', 'password', None)
+        uid = 999
+        user.id = uid
+        db.session.add_all([m_to_like, unliked_message, user])
+        db.session.commit()
+
+        # Add user likes message m
+        user.likes.append(m_to_like)
+
+        db.session.commit()
+
+        likes = Likes.query.filter(Likes.user_id == uid).all()
+        self.assertEqual(len(likes), 1)
+        self.assertEqual(likes[0].message_id, m_to_like.id)
