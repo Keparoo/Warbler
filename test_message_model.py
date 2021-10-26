@@ -9,6 +9,7 @@
 import os
 from unittest import TestCase
 from sqlalchemy import exc
+from datetime import datetime
 
 from models import db, User, Message, Follows
 
@@ -26,12 +27,12 @@ class MessageModelTestCase(TestCase):
         db.create_all()
 
         u = User.signup("testuser1", "test1@test.com", "password1", None)
-        self.uid1 = 1
-        u.id = self.uid1
+        self.uid = 1
+        u.id = self.uid
 
         db.session.commit()
 
-        self.u = User.query.get(self.uid1)
+        self.u = User.query.get(self.uid)
 
         self.client = app.test_client()
 
@@ -39,3 +40,33 @@ class MessageModelTestCase(TestCase):
         """Rollback problems from failed tests"""
 
         db.session.rollback()
+
+    #=========================================================================================================
+    # Basic Model Tests    
+    #=========================================================================================================
+
+    def test_message_model(self):
+        """Does basic model work?"""
+        
+        m = Message(
+            text="test message",
+            user_id=self.uid
+        )
+
+        db.session.add(m)
+        db.session.commit()
+
+        # Test __repr__
+        self.assertEqual(Message.__repr__(m), f"<Message #{m.id}: {m.timestamp}, {m.user_id}>")
+
+        # Test all fields
+        self.assertEqual(m.text, "test message")
+        self.assertEqual(m.user_id, self.uid)
+        self.assertIsInstance(m.timestamp, datetime)
+
+        # u should have 1 message
+        self.assertEqual(len(self.u.messages), 1)
+
+        # test message.user relationship
+        self.assertEqual(m.user, self.u)
+
