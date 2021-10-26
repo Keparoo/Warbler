@@ -7,6 +7,7 @@
 
 import os
 from unittest import TestCase
+from sqlalchemy import exc
 
 from models import db, User, Message, Follows
 
@@ -92,8 +93,11 @@ class UserModelTestCase(TestCase):
         self.assertEqual(len(self.u1.followers), 0)
         self.assertEqual(len(self.u1.following), 0)
         self.assertEqual(len(self.u1.likes), 0)
+
         # Test __repr__
         self.assertEqual(User.__repr__(self.u1), f"<User #{self.u1.id}: {self.u1.username}, {self.u1.email}>")
+
+        # Test all fields (except password)
         self.assertEqual(self.u1.email, "test1@test.com")
         self.assertEqual(self.u1.username, "testuser1")
         self.assertEqual(self.u1.bio, "testbio1")
@@ -105,6 +109,7 @@ class UserModelTestCase(TestCase):
     def test_follows(self):
         """Test for follows & following"""
 
+        # u1 is following u2
         self.u1.following.append(self.u2)
         db.session.commit()
 
@@ -118,8 +123,9 @@ class UserModelTestCase(TestCase):
 
 
     def test_is_following(self):
-        """Test successful is_following"""
+        """Test successful and fail of is_following"""
 
+        # u1 is following u2
         self.u1.following.append(self.u2)
         db.session.commit()
 
@@ -127,12 +133,61 @@ class UserModelTestCase(TestCase):
         self.assertFalse(self.u2.is_following(self.u1), True)
 
     def test_is_followed_by(self):
-        """Test successful is_followed_by"""
+        """Test successful and fail of is_followed_by"""
 
+        # u1 is following u2
         self.u1.following.append(self.u2)
         db.session.commit()    
 
         self.assertEqual(self.u2.is_followed_by(self.u1), True)   
         self.assertFalse(self.u1.is_followed_by(self.u2), True)   
 
+    def test_sign_up(self):
+        """Test successful signup"""
 
+        user = User.signup("usersignuptest", "signup@signup.com", "password", None)
+        uid = 9999
+        user.id = uid
+        db.session.commit()
+
+        user = User.query.get(uid)
+        self.assertEqual(user.username, "usersignuptest")
+        self.assertEqual(user.email, "signup@signup.com")
+        self.assertEqual(user.bio, None)
+        self.assertEqual(user.location, None)
+        self.assertEqual(user.image_url, DEFAULT_IMAGE_URL)
+        self.assertEqual(user.header_image_url, DEFAULT_HEADER_IMAGE_URL)
+        # Bcrypt strings should start with $2b$
+        self.assertTrue(user.password.startswith("$2b$"))
+
+    def test_invalid_username_signup(self):
+        """Test invalid empty username signup"""
+
+        empty_username_user = User.signup(None, "signup@signup.com", "password", None)
+        uid = 9999
+        empty_username_user.id = uid
+
+        # sqlalchemy will raise error as nullable=False
+        with self.assertRaises(exc.IntegrityError) as context:
+            db.session.commit()
+
+
+    def test_invalid_email_signup(self):
+        """Test invalid empty email signup"""
+
+        empty_email_user = User.signup("testuser", None, "password", None)
+        uid = 9999
+        empty_email_user.id = uid
+
+        # sqlalchemy will raise error as nullable=False
+        with self.assertRaises(exc.IntegrityError) as context:
+            db.session.commit()
+
+    def test_invalid_password_signup(self):
+        """Test invalid missing or null-string password signup"""
+
+        with self.assertRaises(ValueError) as context:
+            User.signup("testuser", "signup@signup.com", None, None)
+
+        with self.assertRaises(ValueError) as context:
+            User.signup("testuser", "signup@signup.com", "", None)
