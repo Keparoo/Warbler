@@ -1,6 +1,7 @@
 appnope==0.1.0
 backcall==0.1.0
 bcrypt==3.1.4
+beautifulsoup4==4.10.0
 blinker==1.4
 cffi==1.14.2
 Click==7.0
@@ -29,6 +30,7 @@ python-dateutil==2.7.3
 python-dotenv==0.19.1
 simplegeneric==0.8.1
 six==1.11.0
+soupsieve==2.2.1
 SQLAlchemy==1.2.12
 text-unidecode==1.2
 traitlets==4.3.2
