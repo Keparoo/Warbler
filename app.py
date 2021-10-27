@@ -162,10 +162,6 @@ def users_show(user_id):
 def show_following(user_id):
     """Show list of people this user is following."""
 
-    # if not g.user:
-    #     flash("Access unauthorized.", "danger")
-    #     return redirect("/")
-
     user = User.query.get_or_404(user_id)
     return render_template('users/following.html', user=user)
 
@@ -175,10 +171,6 @@ def show_following(user_id):
 def users_followers(user_id):
     """Show list of followers of this user."""
 
-    # if not g.user:
-    #     flash("Access unauthorized.", "danger")
-    #     return redirect("/")
-
     user = User.query.get_or_404(user_id)
     return render_template('users/followers.html', user=user)
 
@@ -187,10 +179,6 @@ def users_followers(user_id):
 @requires_signed_in
 def add_follow(follow_id):
     """Add a follow for the currently-logged-in user."""
-
-    # if not g.user:
-    #     flash("Access unauthorized.", "danger")
-    #     return redirect("/")
 
     followed_user = User.query.get_or_404(follow_id)
     g.user.following.append(followed_user)
@@ -204,10 +192,6 @@ def add_follow(follow_id):
 def stop_following(follow_id):
     """Have currently-logged-in-user stop following this user."""
 
-    # if not g.user:
-    #     flash("Access unauthorized.", "danger")
-    #     return redirect("/")
-
     followed_user = User.query.get(follow_id)
     g.user.following.remove(followed_user)
     db.session.commit()
@@ -219,10 +203,6 @@ def stop_following(follow_id):
 @requires_signed_in
 def profile():
     """Update profile for current user."""
-
-    # if not g.user:
-    #     flash("Access Unauthorized.", "danger")
-    #     return redirect('/')
 
     user = g.user
     form = UserUpdateForm(obj=user)
@@ -250,10 +230,6 @@ def profile():
 def delete_user():
     """Delete user."""
 
-    # if not g.user:
-    #     flash("Access unauthorized.", "danger")
-    #     return redirect("/")
-
     do_logout()
 
     db.session.delete(g.user)
@@ -266,10 +242,6 @@ def delete_user():
 @requires_signed_in
 def add_like(message_id):
     """Like a warble"""
-
-    # if not g.user:
-    #     flash("Access unauthorized.", "danger")
-    #     return redirect("/")
 
     if message_id in [m.id for m in g.user.messages]:
         flash("You can't like your own message", "warning")
@@ -284,10 +256,6 @@ def add_like(message_id):
 @requires_signed_in
 def remove_like(message_id):
     "Unlike a warble"
-
-    # if not g.user:
-    #     flash("Access unauthorized.", "danger")
-    #     return redirect("/")
 
     if message_id in [m.id for m in g.user.messages]:
         flash("You can't unlike your own message", "warning")
@@ -311,7 +279,7 @@ def show_likes(user_id):
 # Messages routes:
 
 @app.route('/messages/new', methods=["GET", "POST"])
-# @requires_signed_in
+@requires_signed_in
 def messages_add():
     """Add a message:
 
@@ -343,12 +311,9 @@ def messages_show(message_id):
 
 
 @app.route('/messages/<int:message_id>/delete', methods=["POST"])
+@requires_signed_in
 def messages_destroy(message_id):
     """Delete a message."""
-
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
 
     msg = Message.query.get(message_id)
 
