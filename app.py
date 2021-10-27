@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, UserUpdateForm
 from models import db, connect_db, User, Message, Likes
+from auth import requires_signed_in
 
 CURR_USER_KEY = "curr_user"
 
@@ -157,36 +158,39 @@ def users_show(user_id):
 
 
 @app.route('/users/<int:user_id>/following')
+@requires_signed_in
 def show_following(user_id):
     """Show list of people this user is following."""
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+    # if not g.user:
+    #     flash("Access unauthorized.", "danger")
+    #     return redirect("/")
 
     user = User.query.get_or_404(user_id)
     return render_template('users/following.html', user=user)
 
 
 @app.route('/users/<int:user_id>/followers')
+@requires_signed_in
 def users_followers(user_id):
     """Show list of followers of this user."""
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+    # if not g.user:
+    #     flash("Access unauthorized.", "danger")
+    #     return redirect("/")
 
     user = User.query.get_or_404(user_id)
     return render_template('users/followers.html', user=user)
 
 
 @app.route('/users/follow/<int:follow_id>', methods=['POST'])
+@requires_signed_in
 def add_follow(follow_id):
     """Add a follow for the currently-logged-in user."""
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+    # if not g.user:
+    #     flash("Access unauthorized.", "danger")
+    #     return redirect("/")
 
     followed_user = User.query.get_or_404(follow_id)
     g.user.following.append(followed_user)
@@ -196,12 +200,13 @@ def add_follow(follow_id):
 
 
 @app.route('/users/stop-following/<int:follow_id>', methods=['POST'])
+@requires_signed_in
 def stop_following(follow_id):
     """Have currently-logged-in-user stop following this user."""
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+    # if not g.user:
+    #     flash("Access unauthorized.", "danger")
+    #     return redirect("/")
 
     followed_user = User.query.get(follow_id)
     g.user.following.remove(followed_user)
@@ -211,12 +216,13 @@ def stop_following(follow_id):
 
 
 @app.route('/users/profile', methods=["GET", "POST"])
+@requires_signed_in
 def profile():
     """Update profile for current user."""
 
-    if not g.user:
-        flash("Access Unauthorized.", "danger")
-        return redirect('/')
+    # if not g.user:
+    #     flash("Access Unauthorized.", "danger")
+    #     return redirect('/')
 
     user = g.user
     form = UserUpdateForm(obj=user)
@@ -240,12 +246,13 @@ def profile():
 
 
 @app.route('/users/delete', methods=["POST"])
+@requires_signed_in
 def delete_user():
     """Delete user."""
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+    # if not g.user:
+    #     flash("Access unauthorized.", "danger")
+    #     return redirect("/")
 
     do_logout()
 
@@ -256,12 +263,13 @@ def delete_user():
 
 
 @app.route('/users/add_like/<int:message_id>', methods=['POST'])
+@requires_signed_in
 def add_like(message_id):
     """Like a warble"""
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
+    # if not g.user:
+    #     flash("Access unauthorized.", "danger")
+    #     return redirect("/")
 
     if message_id in [m.id for m in g.user.messages]:
         flash("You can't like your own message", "warning")
@@ -273,8 +281,13 @@ def add_like(message_id):
     return redirect("/")
 
 @app.route('/users/remove_like/<int:message_id>', methods=['POST'])
+@requires_signed_in
 def remove_like(message_id):
     "Unlike a warble"
+
+    # if not g.user:
+    #     flash("Access unauthorized.", "danger")
+    #     return redirect("/")
 
     if message_id in [m.id for m in g.user.messages]:
         flash("You can't unlike your own message", "warning")
@@ -298,6 +311,7 @@ def show_likes(user_id):
 # Messages routes:
 
 @app.route('/messages/new', methods=["GET", "POST"])
+# @requires_signed_in
 def messages_add():
     """Add a message:
 

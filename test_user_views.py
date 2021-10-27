@@ -122,7 +122,7 @@ class MessageViewTestCase(TestCase):
             with c.session_transaction() as sess:
                 sess[CURR_USER_KEY] = self.uid
 
-            resp = c.get(f"/users/{self.uid}/following")
+            resp = c.get(f"/users/{self.uid}/following", follow_redirects=True)
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn("@user1", str(resp.data))
