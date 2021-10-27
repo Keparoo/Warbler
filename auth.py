@@ -3,6 +3,8 @@
 from functools import wraps
 from flask import redirect, session, flash, abort
 
+CURR_USER_KEY = "curr_user"
+
 
 def requires_auth(username=''):
   '''Takes username from URL and checks if user is logged in'''
@@ -11,7 +13,7 @@ def requires_auth(username=''):
       @wraps(f)
       def wrapper(username, *args, **kwargs):
 
-        current_user = session.get('curr_user', None)
+        current_user = session.get(CURR_USER_KEY, None)
 
         if username != current_user.username:
             if current_user:
@@ -32,7 +34,7 @@ def requires_signed_in(f):
     
     @wraps(f)
     def decorated(*args, **kwargs):
-        if 'curr_user' not in session:
+        if CURR_USER_KEY not in session:
             flash('Access unauthorized.', category='danger')
             return redirect('/')
             # abort(401)
@@ -46,9 +48,9 @@ def requires_signed_out(f):
     
     @wraps(f)
     def decorated(*args, **kwargs):
-        if 'curr_user' in session:
+        if CURR_USER_KEY in session:
             flash('You are already logged in!', category='warning')
-            user = session.get('curr_user')
+            user = session.get(CURR_USER_KEY)
             return redirect(f'/users/{user.username}')
         return f(*args, **kwargs)
 
