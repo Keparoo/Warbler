@@ -259,6 +259,10 @@ def delete_user():
 def add_like(message_id):
     """Like a warble"""
 
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
     if message_id in [m.id for m in g.user.messages]:
         flash("You can't like your own message", "warning")
     else:
