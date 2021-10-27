@@ -11,9 +11,9 @@ def requires_auth(username=''):
       @wraps(f)
       def wrapper(username, *args, **kwargs):
 
-        current_user = session.get('username', None)
+        current_user = session.get('curr_user', None)
 
-        if username != current_user:
+        if username != current_user.username:
             if current_user:
                 flash('Access unauthorized.', category='danger')
                 return redirect('/')
@@ -46,10 +46,10 @@ def requires_signed_out(f):
     
     @wraps(f)
     def decorated(*args, **kwargs):
-        if 'username' in session:
+        if 'curr_user' in session:
             flash('You are already logged in!', category='warning')
-            username = session.get('username')
-            return redirect(f'/users/{username}')
+            user = session.get('curr_user')
+            return redirect(f'/users/{user.username}')
         return f(*args, **kwargs)
 
     return decorated
