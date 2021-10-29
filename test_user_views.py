@@ -89,7 +89,7 @@ class MessageViewTestCase(TestCase):
         self.assertNotIn("@user3", str(resp.data))
         self.assertNotIn("@user4", str(resp.data))
 
-    def test_users_show(self):
+    def test_user_show(self):
         """Test /users/<user_id>"""
 
         with self.client as c:
